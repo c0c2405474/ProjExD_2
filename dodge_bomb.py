@@ -90,6 +90,15 @@ def get_kk_img(sum_mv: tuple[int, int], kk_imgs: dict[tuple[int, int], pg.Surfac
     """
     return kk_imgs.get(tuple(sum_mv), kk_imgs[(0, 0)])
 
+def calc_orientation(org: pg.Rect, dst: pg.Rect,current_xy: tuple[float, float]) -> tuple[float, float]:
+    # current_xy=[]
+    x=dst.centerx-org.centerx
+    y=dst.centery-org.centery
+    n=(x**2+y**2)**(1/2)
+    if n<300:
+        return current_xy
+    return x/n*(50**(1/2)),y/n*(50**(1/2))
+
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -139,8 +148,11 @@ def main():
             kk_rct.move_ip(-sum_mv[0],-sum_mv[1]) #移動をなかったことにする      
         kk_img = get_kk_img(tuple(sum_mv), kk_imgs) 
         screen.blit(kk_img, kk_rct)
+        vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy))
         avx = vx*bb_accs[min(tmr//500, 9)]
         avy= vy*bb_accs[min(tmr//500, 9)]
+        bb_rct.width=bb_img.get_rect().width
+        bb_rct.height=bb_img.get_rect().height
         bb_rct.move_ip(avx,avy) #爆弾の移動
         yoko,tate= check_bound(bb_rct)
         if not yoko: #横方向にはみ出ていたら
