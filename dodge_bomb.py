@@ -50,6 +50,10 @@ def gameover(screen: pg.Surface) -> None:
 
 
 def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    関数内で加速度の段階と画像の拡大のリストの作成
+    戻り値→二つのリストをタプルにしたもの
+    """
     bb_lst = []
     sbb_accs = [a for a in range(1, 11)]
     for r in range(1, 11):
@@ -60,11 +64,39 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     return sbb_accs, bb_lst
 
 
+def load_kk_images() -> dict[tuple[int, int], pg.Surface]: # こうかとんの画像を読み込む
+    img_base = pg.image.load("fig/3.png") # こうかとんの画像を読み込む
+    img_base = pg.transform.rotozoom(img_base, 0, 0.9) # 画像のサイズを縮小する
+    himg_base =pg.transform.flip(img_base,True,False)
+    himg_base2 =pg.transform.flip(img_base,False,True)
+    himg_base3=pg.transform.flip(img_base,True,True)
+    kk_imgs = {
+        (0, 0): img_base,  # 静止画像
+        (0, -5): pg.transform.rotozoom(himg_base2, -90, 0.9), # 上方向
+        (0, 5): pg.transform.rotozoom(himg_base2, 90, 0.9), # 下方向
+        (-5, 0): pg.transform.rotozoom(himg_base3, 180, 0.9), # 左方向
+        (5, 0): pg.transform.rotozoom(himg_base2, -180, 0.9), # 右方向
+        (-5, -5): pg.transform.rotozoom(img_base, -45, 0.9), # 左上方向
+        (-5, 5): pg.transform.rotozoom(img_base, 45, 0.9), # 左下方向
+        (5, -5): pg.transform.rotozoom(himg_base, 45, 0.9), # 右上方向
+        (5, 5): pg.transform.rotozoom(himg_base, -45, 0.9), # 右下方向
+    }
+    return kk_imgs
+
+# 移動量から画像を取得
+def get_kk_img(sum_mv: tuple[int, int], kk_imgs: dict[tuple[int, int], pg.Surface]) -> pg.Surface:
+    """
+    移動量の合計値タプルに対応する向きの画像Surfaceを返す
+    """
+    return kk_imgs.get(tuple(sum_mv), kk_imgs[(0, 0)])
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    kk_imgs = load_kk_images()  # ★ 画像読み込み
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
     bb_img = pg.Surface((20,20)) #空のsurfaceをつくる
@@ -104,7 +136,8 @@ def main():
         #     sum_mv[0] += 5
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True,True):
-            kk_rct.move_ip(-sum_mv[0],-sum_mv[1]) #移動をなかったことにする       
+            kk_rct.move_ip(-sum_mv[0],-sum_mv[1]) #移動をなかったことにする      
+        kk_img = get_kk_img(tuple(sum_mv), kk_imgs) 
         screen.blit(kk_img, kk_rct)
         avx = vx*bb_accs[min(tmr//500, 9)]
         avy= vy*bb_accs[min(tmr//500, 9)]
