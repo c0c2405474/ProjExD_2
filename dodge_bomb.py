@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import time
 import pygame as pg
 
 
@@ -24,8 +25,28 @@ def check_bound(rct: pg.Rect) -> tuple[bool,bool]:
         yoko = False
     if rct.top < 0 or HEIGHT < rct.bottom:
         tate = False
-    return yoko, tate #横方向、縦方向の画面内判定を返す       
+    return yoko, tate #横方向、縦方向の画面内判定を返す  
 
+
+def gameover(screen: pg.Surface) -> None:
+    cryk_img =pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9) #泣いてるこうかとん
+    cryk_rct = cryk_img.get_rect()
+    cryk_rct.center = 757, 261
+    cryk_img2 =pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9) #泣いてるこうかとん2匹目
+    cryk_rct2 = cryk_img2.get_rect()
+    cryk_rct2.center = 357, 261
+    gameover_img = pg.Surface((1100, 650)) #空のsurfaceをつくる
+    pg.draw.rect(gameover_img, (0,0,0), (1100,650,1100,650)) #暗い画面をつくる
+    gameover_img.set_alpha((128))  
+    gameover_rct=gameover_img.get_rect() #暗い画面のRectを取得
+    fonto = pg.font.Font(None, 80)
+    txt = fonto.render("GAMEOVER",True, (255, 255, 255))
+    screen.blit(gameover_img, gameover_rct)
+    screen.blit(cryk_img, cryk_rct)
+    screen.blit(cryk_img2, cryk_rct2)
+    screen.blit(txt, [400, 250])
+    pg.display.update()
+    time.sleep(5)
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -36,7 +57,7 @@ def main():
     kk_rct.center = 300, 200
     bb_img = pg.Surface((20,20)) #空のsurfaceをつくる
     pg.draw.circle(bb_img,(255,0,0),(10,10),10) #赤い円を描く
-    bb_img.set_colorkey((0,0,0))  
+    bb_img.set_colorkey((0,0,0))
     bb_rct=bb_img.get_rect() #爆弾Rectを取得
     bb_rct.centerx = random.randint(0,WIDTH) #横座標の乱数
     bb_rct.centery = random.randint(0,HEIGHT) #縦座標の乱数
@@ -48,7 +69,8 @@ def main():
             if event.type == pg.QUIT: 
                 return
         if kk_rct.colliderect(bb_rct): #こうかとんRectと爆弾Rectの衝突判定 
-            print("ゲームオーバー")
+            gameover(screen)
+            # display.update()
             return   
         screen.blit(bg_img, [0, 0]) 
 
