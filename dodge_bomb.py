@@ -30,6 +30,11 @@ def check_bound(rct: pg.Rect) -> tuple[bool,bool]:
 
 
 def gameover(screen: pg.Surface) -> None:
+    """
+    こうかとん2匹画面に表示
+    画面を暗転
+    GAMEOVERを標示
+    """
     cryk_img =pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 1.0)  # 泣いてるこうかとん
     cryk_rct = cryk_img.get_rect()
     cryk_rct.center = 757, 261
@@ -66,6 +71,10 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
 
 
 def load_kk_images() -> dict[tuple[int, int], pg.Surface]:  # こうかとんの画像を読み込む
+    """
+    こうかとんの移動方向を標示
+    上下左右反転
+    """
     img_base = pg.image.load("fig/3.png")  # こうかとんの画像を読み込む
     img_base = pg.transform.rotozoom(img_base, 0, 0.9)  # 画像のサイズを縮小する
     himg_base =pg.transform.flip(img_base,True,False)
@@ -92,6 +101,10 @@ def get_kk_img(sum_mv: tuple[int, int], kk_imgs: dict[tuple[int, int], pg.Surfac
     return kk_imgs.get(tuple(sum_mv), kk_imgs[(0, 0)])
 
 def calc_orientation(org: pg.Rect, dst: pg.Rect,current_xy: tuple[float, float]) -> tuple[float, float]:
+    """
+    xとyの要素を計算
+    300未満の時元のx,yを返す
+    """
     # current_xy=[]
     x=dst.centerx-org.centerx
     y=dst.centery-org.centery
