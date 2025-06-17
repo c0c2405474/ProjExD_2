@@ -29,10 +29,10 @@ def check_bound(rct: pg.Rect) -> tuple[bool,bool]:
 
 
 def gameover(screen: pg.Surface) -> None:
-    cryk_img =pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9) #泣いてるこうかとん
+    cryk_img =pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 1.0) #泣いてるこうかとん
     cryk_rct = cryk_img.get_rect()
     cryk_rct.center = 757, 261
-    cryk_img2 =pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 0.9) #泣いてるこうかとん2匹目
+    cryk_img2 =pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 1.0) #泣いてるこうかとん2匹目
     cryk_rct2 = cryk_img2.get_rect()
     cryk_rct2.center = 357, 261
     gameover_img = pg.Surface((1100, 650)) #空のsurfaceをつくる
@@ -47,6 +47,18 @@ def gameover(screen: pg.Surface) -> None:
     screen.blit(txt, [400, 250])
     pg.display.update()
     time.sleep(5)
+
+
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    bb_lst = []
+    sbb_accs = [a for a in range(1, 11)]
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_img.set_colorkey((0,0,0))
+        bb_lst.append(bb_img)
+    return sbb_accs, bb_lst
+
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -71,7 +83,9 @@ def main():
         if kk_rct.colliderect(bb_rct): #こうかとんRectと爆弾Rectの衝突判定 
             gameover(screen)
             # display.update()
-            return   
+            return
+        bb_accs, bb_imgs = init_bb_imgs()
+        bb_img = bb_imgs[min(tmr//500, 9)]   
         screen.blit(bg_img, [0, 0]) 
 
         key_lst = pg.key.get_pressed()
@@ -92,13 +106,17 @@ def main():
         if check_bound(kk_rct) != (True,True):
             kk_rct.move_ip(-sum_mv[0],-sum_mv[1]) #移動をなかったことにする       
         screen.blit(kk_img, kk_rct)
-        bb_rct.move_ip(vx,vy) #爆弾の移動
+        avx = vx*bb_accs[min(tmr//500, 9)]
+        avy= vy*bb_accs[min(tmr//500, 9)]
+        bb_rct.move_ip(avx,avy) #爆弾の移動
         yoko,tate= check_bound(bb_rct)
         if not yoko: #横方向にはみ出ていたら
             vx*=-1
         if not tate: #縦方向にはみ出ていたら
             vy*=-1    
         screen.blit(bb_img, bb_rct)
+        
+        # bb_img = bb_imgs[min(tmr//500, 9)]
         pg.display.update()
         tmr += 1
         clock.tick(50)
